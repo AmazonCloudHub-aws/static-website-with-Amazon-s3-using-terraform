@@ -1,0 +1,32 @@
+name: Terraform Apply
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v1
+
+    - name: Install localstack
+      run: pip install localstack
+
+    - name: Start localstack
+      run: localstack start
+
+    - name: Terraform init
+      run: terraform init
+
+    - name: Terraform apply
+      run: terraform apply -auto-approve
+
+    - name: Terraform destroy (cleanup)
+      run: terraform destroy -auto-approve
