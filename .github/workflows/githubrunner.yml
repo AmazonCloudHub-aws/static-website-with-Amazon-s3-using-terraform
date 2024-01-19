@@ -22,10 +22,10 @@ jobs:
       run: |
         sudo apt-get update -y
         sudo apt-get install -y python3-pip
-        pip install localstack
+        pip install --user localstack
 
     - name: Start localstack
-      run: localstack start
+      run: localstack start &
 
     - name: Terraform init
       run: terraform init
@@ -33,5 +33,6 @@ jobs:
     - name: Terraform apply
       run: terraform apply -auto-approve
 
-    - name: Terraform destroy (cleanup)
-      run: terraform destroy -auto-approve
+    # Uncomment the following lines if you need to destroy resources after applying
+    # - name: Terraform destroy (cleanup)
+    #   run: terraform destroy -auto-approve
