@@ -23,6 +23,7 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1  # Specify your AWS Region here
 
     - name: Terraform Init
       run: terraform init
@@ -36,4 +37,4 @@ jobs:
 
     # Optional: Uncomment to add a cleanup step that destroys resources after they have been applied
     # - name: Terraform Destroy
-    #   run: terraform destroy -auto-approve
+    #   run:
