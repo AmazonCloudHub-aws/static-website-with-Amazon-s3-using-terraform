@@ -1,3 +1,3 @@
-document.getElementById("clickMe").onclick = function() {
-    alert("You clicked the button!");
-};
+document.getElementById('clickMe').addEventListener('click', function() {
+    alert('Thanks for clicking!');
+});
