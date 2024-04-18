@@ -122,6 +122,23 @@ EOF
   force_destroy = true
 }
 
+## Automating Uploads with Terraform
+resource "aws_s3_bucket_object" "website_files" {
+  for_each = fileset("${path.module}/website", "**/*")
+  bucket   = aws_s3_bucket.s3_bucket.bucket
+  key      = each.value
+  source   = "${path.module}/website/${each.value}"
+  acl      = "public-read"
+  content_type = lookup({
+    html = "text/html",
+    css  = "text/css",
+    js   = "application/javascript",
+    png  = "image/png",
+    jpg  = "image/jpeg"
+  }, lower(split(".", each.value)[1]), "application/octet-stream")
+}
+
+
 # CloudFront Origin Access Identity
 resource "aws_cloudfront_origin_access_identity" "s3_oai" {
   comment = "OAI for ${var.bucket_name}"
