@@ -14,6 +14,7 @@ variable "aws_region" {
 
 variable "cf_alias" {
   description = "The alias (CNAME) for the CloudFront distribution, such as www.example.com"
+  default = "www.example.com"
 }
 
 variable "tags" {
