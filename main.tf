@@ -129,15 +129,23 @@ resource "aws_s3_bucket_object" "website_files" {
   key      = each.value
   source   = "${path.module}/website/${each.value}"
   acl      = "public-read"
-  content_type = lookup({
-    html = "text/html",
-    css  = "text/css",
-    js   = "application/javascript",
-    png  = "image/png",
-    jpg  = "image/jpeg"
-  }, lower(split(".", each.value)[1]), "application/octet-stream")
+  content_type = mime_type(each.value, "application/octet-stream")
 }
 
+function "mime_type" {
+  parameters = ["filename", "default"]
+  body = {
+    content_types = {
+      "html" = "text/html"
+      "css"  = "text/css"
+      "js"   = "application/javascript"
+      "png"  = "image/png"
+      "jpg"  = "image/jpeg"
+    }
+    extension = split(".", filename)[length(split(".", filename)) - 1]
+    content_types[extension] ?? default
+  }
+}
 
 # CloudFront Origin Access Identity
 resource "aws_cloudfront_origin_access_identity" "s3_oai" {
