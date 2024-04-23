@@ -164,7 +164,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   is_ipv6_enabled     = true
   default_root_object = "index.html"
 
-  aliases = [var.cf_alias]
+  aliases = []  # No custom domain aliases are specified
 
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD"]
