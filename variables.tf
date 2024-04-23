@@ -1,7 +1,7 @@
 # Input variable definitions
 
 variable "bucket_name" {
-  description = "Name of the S3 bucket. Must be Unique across AWS"
+  description = "Name of the S3 bucket."
   type        = string
   default = "terraform-website-bucket"
 }
@@ -13,9 +13,10 @@ variable "aws_region" {
 }
 
 variable "cf_alias" {
-  description = "The alias (CNAME) for the CloudFront distribution, such as www.example.com"
-  default = "www.example.com"
+  description = "The alias (CNAME) for the CloudFront distribution, such as www.yourdomain.com. This must be provided during Terraform execution."
+  type        = string
 }
+
 
 variable "tags" {
   description = "A map of tags to add to all resources"
