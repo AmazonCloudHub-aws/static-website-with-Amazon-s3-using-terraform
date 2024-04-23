@@ -56,6 +56,17 @@ provider "aws" {
   region = var.aws_region
 }
 
+locals {
+  content_types = {
+    "html" = "text/html"
+    "css"  = "text/css"
+    "js"   = "application/javascript"
+    "png"  = "image/png"
+    "jpg"  = "image/jpeg"
+    "default" = "application/octet-stream"
+  }
+}
+
 # S3 Bucket for Logs
 resource "aws_s3_bucket" "log_bucket" {
   bucket = "${var.bucket_name}-logs"
@@ -129,23 +140,9 @@ resource "aws_s3_bucket_object" "website_files" {
   key      = each.value
   source   = "${path.module}/website/${each.value}"
   acl      = "public-read"
-  content_type = mime_type(each.value, "application/octet-stream")
+  content_type = lookup(local.content_types, lower(split(".", each.value)[length(split(".", each.value)) - 1]), local.content_types["default"])
 }
 
-function "mime_type" {
-  parameters = ["filename", "default"]
-  body = {
-    content_types = {
-      "html" = "text/html"
-      "css"  = "text/css"
-      "js"   = "application/javascript"
-      "png"  = "image/png"
-      "jpg"  = "image/jpeg"
-    }
-    extension = split(".", filename)[length(split(".", filename)) - 1]
-    content_types[extension] ?? default
-  }
-}
 
 # CloudFront Origin Access Identity
 resource "aws_cloudfront_origin_access_identity" "s3_oai" {
