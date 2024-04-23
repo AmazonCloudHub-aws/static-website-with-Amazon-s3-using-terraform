@@ -12,12 +12,6 @@ variable "aws_region" {
   default = "eu-central-1"
 }
 
-variable "cf_alias" {
-  description = "The alias (CNAME) for the CloudFront distribution, such as www.yourdomain.com. This must be provided during Terraform execution."
-  type        = string
-}
-
-
 variable "tags" {
   description = "A map of tags to add to all resources"
   type        = map(string)
