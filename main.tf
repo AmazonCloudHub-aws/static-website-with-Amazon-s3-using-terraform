@@ -125,9 +125,18 @@ resource "aws_s3_bucket_object" "website_files" {
     css  = "text/css",
     js   = "application/javascript",
     png  = "image/png",
-    jpg  = "image/jpeg"
+    jpg  = "image/jpeg",
+    gif  = "image/gif",
+    svg  = "image/svg+xml",
+    ttf  = "font/ttf",
+    otf  = "font/otf",
+    woff = "font/woff",
+    eot  = "application/vnd.ms-fontobject",
+    less = "text/css",
+    scss = "text/x-scss"
   }, lower(split(".", each.value)[1]), "application/octet-stream")
 }
+
 
 
 # CloudFront Origin Access Identity
