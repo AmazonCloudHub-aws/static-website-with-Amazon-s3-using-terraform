@@ -57,15 +57,19 @@ provider "aws" {
 }
 
 locals {
+  # Defining common content types for various file extensions
   content_types = {
-    "html" = "text/html"
-    "css"  = "text/css"
-    "js"   = "application/javascript"
-    "png"  = "image/png"
-    "jpg"  = "image/jpeg"
+    "html"  = "text/html",
+    "css"   = "text/css",
+    "js"    = "application/javascript",
+    "png"   = "image/png",
+    "jpg"   = "image/jpeg",
+    "jpeg"  = "image/jpeg",
+    "less"  = "text/less",
     "default" = "application/octet-stream"
   }
 }
+
 
 # S3 Bucket for Logs
 resource "aws_s3_bucket" "log_bucket" {
@@ -76,62 +80,85 @@ resource "aws_s3_bucket" "log_bucket" {
 # Create S3 Bucket Resource
 resource "aws_s3_bucket" "s3_bucket" {
   bucket = var.bucket_name
-  acl    = "private"
-
-  versioning {
-    enabled = true
-  }
-
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-    }
-  }
-
-  logging {
-    target_bucket = aws_s3_bucket.log_bucket.bucket
-    target_prefix = "log/"
-  }
-
-  lifecycle_rule {
-    enabled = true
-
-    noncurrent_version_transition {
-      days          = 30
-      storage_class = "STANDARD_IA"
-    }
-
-    noncurrent_version_expiration {
-      days = 90
-    }
-  }
-
-  website {
-    index_document = "index.html"
-    error_document = "error.html"
-  }
-
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "AWS": "${aws_cloudfront_origin_access_identity.s3_oai.iam_arn}"
-      },
-      "Action": "s3:GetObject",
-      "Resource": "arn:aws:s3:::${var.bucket_name}/*"
-    }
-  ]
-}
-EOF
 
   tags          = var.tags
   force_destroy = true
 }
+
+
+resource "aws_s3_bucket_lifecycle_configuration" "s3_bucket_lifecycle" {
+    bucket = aws_s3_bucket.s3_bucket.bucket
+
+    rule {
+        id = "log"
+
+        status = "Enabled"
+
+        transition {
+            days          = 30
+            storage_class = "STANDARD_IA"
+        }
+
+        expiration {
+            days = 90
+        }
+    }
+}
+
+
+resource "aws_s3_bucket_versioning" "s3_bucket_versioning" {
+  bucket = aws_s3_bucket.s3_bucket.id
+
+  versioning_configuration {
+    status = "Enabled" 
+  }
+}
+
+resource "aws_s3_bucket_logging" "s3_bucket_logging" {
+    bucket = aws_s3_bucket.s3_bucket.id
+    target_bucket = aws_s3_bucket.log_bucket.id
+    target_prefix = "log/"
+}
+
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "s3_bucket_sse_config" {
+  bucket = aws_s3_bucket.s3_bucket.bucket
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_website_configuration" "s3_bucket_website_config" {
+    bucket = aws_s3_bucket.s3_bucket.bucket
+
+    index_document {
+        suffix = "index.html"
+    }
+}
+
+
+resource "aws_s3_bucket_policy" "s3_bucket_policy" {
+  bucket = aws_s3_bucket.s3_bucket.id
+
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Principal": {
+          "AWS": aws_cloudfront_origin_access_identity.s3_oai.iam_arn
+        },
+        "Action": "s3:GetObject",
+        "Resource": "arn:aws:s3:::${aws_s3_bucket.s3_bucket.bucket}/*"
+      }
+    ]
+  })
+}
+
+
 
 ## Automating Uploads with Terraform
 resource "aws_s3_bucket_object" "website_files" {
@@ -140,7 +167,14 @@ resource "aws_s3_bucket_object" "website_files" {
   key      = each.value
   source   = "${path.module}/website/${each.value}"
   acl      = "public-read"
-  content_type = lookup(local.content_types, lower(split(".", each.value)[length(split(".", each.value)) - 1]), local.content_types["default"])
+  content_type = lookup(
+  local.content_types,
+  lower(
+    length(split(".", each.value)) > 1 ? split(".", each.value)[length(split(".", each.value)) - 1] : ""
+  ),
+  local.content_types["default"]
+)
+
 }
 
 
