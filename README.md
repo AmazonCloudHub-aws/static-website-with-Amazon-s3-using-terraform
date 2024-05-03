@@ -85,3 +85,36 @@ No modules.
 | <a name="output_domain"></a> [domain](#output\_domain) | Domain Name of the bucket |
 | <a name="output_endpoint"></a> [endpoint](#output\_endpoint) | Endpoint Information of the bucket |
 | <a name="output_name"></a> [name](#output\_name) | Name (id) of the bucket |
+
+# AWS S3 and CloudFront Terraform Configuration
+
+This Terraform configuration sets up an AWS S3 bucket and a CloudFront distribution. The S3 bucket is configured for hosting a static website with enhanced security and management features. The CloudFront distribution is used to deliver content from the S3 bucket efficiently.
+
+## Components
+
+- **S3 Bucket**: Configured for website hosting with public read access, versioning, server-side encryption, access logging, lifecycle rules, and a policy for CloudFront access.
+- **S3 Bucket for Logs**: A separate bucket for storing access logs from the primary S3 bucket.
+- **CloudFront Distribution**: Setup to serve content from the S3 bucket globally with optimized performance and caching.
+- **CloudFront Origin Access Identity (OAI)**: Used to restrict direct access to the S3 bucket, allowing only CloudFront to access it.
+
+## Features
+
+1. **S3 Bucket Configuration**:
+   - Versioning: Enabled to keep multiple versions of an object in the same bucket.
+   - Server-Side Encryption: Uses AES256 encryption algorithm for data security.
+   - Access Logging: Logs stored in a separate S3 bucket for monitoring and auditing.
+   - Lifecycle Rules: Automates transitioning of older objects to cheaper storage classes and clean-up.
+   - Bucket Policy: Restricts access to the bucket to only the CloudFront distribution.
+
+2. **CloudFront Distribution Configuration**:
+   - Caching: Optimizes the delivery of website content.
+   - Security: Uses the default CloudFront SSL certificate for HTTPS connections.
+   - IPv6 Enabled: Allows access via IPv6 addresses.
+   - Default Root Object: Set to 'index.html'.
+
+## Usage
+
+Before running this configuration, update the variables in the `variables.tf` file, especially the AWS region (`aws_region`), S3 bucket name (`bucket_name`), and CloudFront alias (`cf_alias`). Ensure that your AWS account has the necessary permissions to create and manage these resources.
+
+Run the following commands to deploy the infrastructure:
+
