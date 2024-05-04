@@ -1,120 +1,62 @@
-## Requirements
+# Static Website on AWS with Terraform
 
-| Name | Version |
-|------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3.2 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.0 |
+## Project Overview
 
-## Providers
+This project sets up a static website hosted on AWS, utilizing Terraform for infrastructure provisioning and management. The website is hosted on an Amazon S3 bucket, and a CloudFront distribution is used to deliver the content. The setup includes logging, versioning, lifecycle policies, server-side encryption, and a website configuration for the S3 bucket. This infrastructure follows a best-practice approach to securely and efficiently host a static website.
 
-| Name | Version |
-|------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 4.67.0 |
+## Project Components
 
-## Modules
+### S3 Bucket for Static Website
+   - The project creates two S3 buckets: one for the website's static content and another for logs.
+   - The bucket for the website has lifecycle rules to transition objects to a lower-cost storage class and eventually expire them.
+   - The website bucket also has versioning enabled and server-side encryption configured with AES256.
+   - Logging is configured to direct logs to the logging bucket.
+   - The bucket is configured for website hosting with an index document (`index.html`).
 
-No modules.
+### CloudFront Distribution
+   - The CloudFront distribution is set up to serve content from the S3 bucket.
+   - The CloudFront origin access identity is used to restrict access to the S3 bucket, ensuring that only CloudFront can access it.
+   - The distribution includes settings for caching behavior, viewer protocol policy, and geographical restrictions.
 
-## Resources
+### Bucket Policy
+   - The S3 bucket policy grants public read access to the website content, while restricting other actions.
 
-| Name | Type |
-|------|------|
-| [aws_cloudfront_distribution.s3_distribution](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_distribution) | resource |
-| [aws_cloudfront_origin_access_identity.s3_oai](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_origin_access_identity) | resource |
-| [aws_s3_bucket.log_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
-| [aws_s3_bucket.s3_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
+### Automating Uploads
+   - The project automates the upload of website files to the S3 bucket, ensuring that content is always up to date.
 
-## Inputs
+### Provider Configuration
+   - The project uses the AWS provider, with the region specified as a variable.
 
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | Region in which AWS Resources to be created | `string` | `"eu-central-1"` | no |
-| <a name="input_bucket_name"></a> [bucket\_name](#input\_bucket\_name) | Name of the S3 bucket. Must be Unique across AWS | `string` | `"terraform-website-bucket"` | no |
-| <a name="input_cf_alias"></a> [cf\_alias](#input\_cf\_alias) | The alias (CNAME) for the CloudFront distribution, such as www.example.com | `any` | n/a | yes |
-| <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` | <pre>{<br>  "Environment": "dev",<br>  "Terraform": "true"<br>}</pre> | no |
+## How to Deploy
 
-## Outputs
+1. **Prerequisites**
+   - Ensure you have AWS credentials configured on your system.
+   - Install Terraform on your system.
 
-| Name | Description |
-|------|-------------|
-| <a name="output_arn"></a> [arn](#output\_arn) | ARN of the S3 Bucket |
-| <a name="output_domain"></a> [domain](#output\_domain) | Domain Name of the bucket |
-| <a name="output_endpoint"></a> [endpoint](#output\_endpoint) | Endpoint Information of the bucket |
-| <a name="output_name"></a> [name](#output\_name) | Name (id) of the bucket |
-Damilolas-Air:static-website-with-Amazon-s3-using-terraform damilolaijato$ terraform-docs markdown table .
-## Requirements
+2. **Clone the Repository**
+   - Clone the project repository to your local machine.
 
-| Name | Version |
-|------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3.2 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.0 |
+3. **Configure Variables**
+   - Set the required variables, including `aws_region`, `bucket_name`, and `tags`.
 
-## Providers
+4. **Deploy the Infrastructure**
+   - Initialize the Terraform configuration with `terraform init`.
+   - Plan the infrastructure changes with `terraform plan`.
+   - Apply the infrastructure with `terraform apply`.
 
-| Name | Version |
-|------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 4.67.0 |
+5. **Access the Website**
+   - Once the CloudFront distribution is deployed, obtain its domain name from the Terraform output or AWS Console.
+   - Access the website by navigating to the CloudFront domain name in a web browser.
 
-## Modules
+## How to Access the Static Website
 
-No modules.
+The static website is delivered through a CloudFront distribution, which serves the content from the S3 bucket. After deploying the infrastructure:
 
-## Resources
+1. Retrieve the CloudFront distribution domain name.
+2. Open a web browser and enter the domain name to view the static website.
 
-| Name | Type |
-|------|------|
-| [aws_cloudfront_distribution.s3_distribution](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_distribution) | resource |
-| [aws_cloudfront_origin_access_identity.s3_oai](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_origin_access_identity) | resource |
-| [aws_s3_bucket.log_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
-| [aws_s3_bucket.s3_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
+The CloudFront distribution's caching settings, viewer protocol policy, and other configurations ensure efficient and secure delivery of the website's static content.
 
-## Inputs
+## License
 
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | Region in which AWS Resources to be created | `string` | `"eu-central-1"` | no |
-| <a name="input_bucket_name"></a> [bucket\_name](#input\_bucket\_name) | Name of the S3 bucket. Must be Unique across AWS | `string` | `"terraform-website-bucket"` | no |
-| <a name="input_cf_alias"></a> [cf\_alias](#input\_cf\_alias) | The alias (CNAME) for the CloudFront distribution, such as www.example.com | `any` | n/a | yes |
-| <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` | <pre>{<br>  "Environment": "dev",<br>  "Terraform": "true"<br>}</pre> | no |
-
-## Outputs
-
-| Name | Description |
-|------|-------------|
-| <a name="output_arn"></a> [arn](#output\_arn) | ARN of the S3 Bucket |
-| <a name="output_domain"></a> [domain](#output\_domain) | Domain Name of the bucket |
-| <a name="output_endpoint"></a> [endpoint](#output\_endpoint) | Endpoint Information of the bucket |
-| <a name="output_name"></a> [name](#output\_name) | Name (id) of the bucket |
-
-# AWS S3 and CloudFront Terraform Configuration
-
-This Terraform configuration sets up an AWS S3 bucket and a CloudFront distribution. The S3 bucket is configured for hosting a static website with enhanced security and management features. The CloudFront distribution is used to deliver content from the S3 bucket efficiently.
-
-## Components
-
-- **S3 Bucket**: Configured for website hosting with public read access, versioning, server-side encryption, access logging, lifecycle rules, and a policy for CloudFront access.
-- **S3 Bucket for Logs**: A separate bucket for storing access logs from the primary S3 bucket.
-- **CloudFront Distribution**: Setup to serve content from the S3 bucket globally with optimized performance and caching.
-- **CloudFront Origin Access Identity (OAI)**: Used to restrict direct access to the S3 bucket, allowing only CloudFront to access it.
-
-## Features
-
-1. **S3 Bucket Configuration**:
-   - Versioning: Enabled to keep multiple versions of an object in the same bucket.
-   - Server-Side Encryption: Uses AES256 encryption algorithm for data security.
-   - Access Logging: Logs stored in a separate S3 bucket for monitoring and auditing.
-   - Lifecycle Rules: Automates transitioning of older objects to cheaper storage classes and clean-up.
-   - Bucket Policy: Restricts access to the bucket to only the CloudFront distribution.
-
-2. **CloudFront Distribution Configuration**:
-   - Caching: Optimizes the delivery of website content.
-   - Security: Uses the default CloudFront SSL certificate for HTTPS connections.
-   - IPv6 Enabled: Allows access via IPv6 addresses.
-   - Default Root Object: Set to 'index.html'.
-
-## Usage
-
-Before running this configuration, update the variables in the `variables.tf` file, especially the AWS region (`aws_region`), S3 bucket name (`bucket_name`), and CloudFront alias (`cf_alias`). Ensure that your AWS account has the necessary permissions to create and manage these resources.
-
-Run the following commands to deploy the infrastructure:
-
+This project is licensed under the [MIT License](LICENSE).
