@@ -14,19 +14,6 @@ provider "aws" {
   region = var.aws_region
 }
 
-locals {
-  # Defining common content types for various file extensions
-  content_types = {
-    "html"    = "text/html",
-    "css"     = "text/css",
-    "js"      = "application/javascript",
-    "png"     = "image/png",
-    "jpg"     = "image/jpeg",
-    "jpeg"    = "image/jpeg",
-    "less"    = "text/less",
-    "default" = "application/octet-stream"
-  }
-}
 
 
 # S3 Bucket for Logs
@@ -34,7 +21,7 @@ resource "aws_s3_bucket" "log_bucket" {
   bucket = "${var.bucket_name}-logs"
 }
 
-# Create S3 Bucket Resource
+# S3 Bucket for the static website
 resource "aws_s3_bucket" "s3_bucket" {
   bucket = var.bucket_name
 
@@ -95,6 +82,7 @@ resource "aws_s3_bucket_website_configuration" "s3_bucket_website_config" {
   }
 }
 
+# Bucket policy
 resource "aws_s3_bucket_policy" "s3_bucket_policy" {
   bucket = aws_s3_bucket.s3_bucket.id
 
@@ -114,7 +102,6 @@ resource "aws_s3_bucket_policy" "s3_bucket_policy" {
 
 
 ## Automating Uploads with Terraform
-# Remove ACL attribute from aws_s3_bucket_object resource
 resource "aws_s3_bucket_object" "website_files" {
   for_each = fileset("${path.module}/website", "**/*")
   bucket   = aws_s3_bucket.s3_bucket.bucket
@@ -138,13 +125,11 @@ resource "aws_s3_bucket_object" "website_files" {
 }
 
 
-
 # CloudFront Origin Access Identity
 resource "aws_cloudfront_origin_access_identity" "s3_oai" {
   comment = "OAI for ${var.bucket_name}"
 
 }
-
 
 # CloudFront distribution for the S3 bucket
 resource "aws_cloudfront_distribution" "s3_distribution" {
