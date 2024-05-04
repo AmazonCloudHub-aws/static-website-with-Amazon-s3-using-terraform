@@ -59,4 +59,4 @@ The CloudFront distribution's caching settings, viewer protocol policy, and othe
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+
